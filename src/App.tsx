@@ -1,70 +1,57 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Container from 'react-bootstrap/Container';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Card from 'react-bootstrap/Card';
-import FormControl from 'react-bootstrap/FormControl';
-import Button from 'react-bootstrap/Button';
-import Row from 'react-bootstrap/Row';
+import { Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import Container from 'react-bootstrap/Container'
+import Home from './views/Home';
+import Navigation from './components/Navigation';
+import Login from './views/Login';
+import SignUp from './views/SignUp';
+import { UserType } from './types';
+import { getMe } from './lib/apiWrapper'
 
-const CLIENT_ID = "0c3680d3999c4fce9773896b6bbfd6c0";
-const CLIENT_SECRET = "ab78641e1d76471eb2bd440640475008";
 
-
-function App() {
-    const [searchInput, setSearchInput] = useState("");
-    const [accessToken, setAccessToken] = useState("")
+export default function App() {
+    const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('token') && new Date(localStorage.getItem('tokenExp') || 0) > new Date() ? true : false);
+    const [loggedInUser, setLoggedInUser] = useState<UserType | null>(null)
 
     useEffect(() => {
-        //API Access Token
-        var authParameters = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: 'grant_type=client_credentials&client_id=' + CLIENT_ID + '&client_secret=' + CLIENT_SECRET
+        async function getLoggedInUser() {
+            if (isLoggedIn) {
+                const token = localStorage.getItem('token') || ''
+                const response = await getMe(token);
+                if (response.data) {
+                    setLoggedInUser(response.data);
+                    localStorage.setItem('currentUser', JSON.stringify(response.data))
+                } else {
+                    setIsLoggedIn(false);
+                    console.error(response.data);
+                }
+            }
         }
-        fetch('https://accounts.spotify.com/api/token', authParameters )
-            .then(result => result.json())
-            .then(data => setAccessToken(data.access_token))
-    }, [])
+        getLoggedInUser()
+    }, [isLoggedIn])
 
-    // Search
-    async function search() {
-        console.log("Search for " + searchInput);
+    const logUserIn = () => {
+        setIsLoggedIn(true)
+    }
+
+    const logUserOut = () => {
+        setIsLoggedIn(false);
+        setLoggedInUser(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('tokenExp');
+        localStorage.removeItem('currentUser');
     }
 
     return (
-        <div className="App">
+        <>
+            <Navigation isLoggedIn={isLoggedIn} logUserOut={logUserOut} />
             <Container>
-                <InputGroup className="mb-3" size="lg">
-                    <FormControl
-                        placeholder="Search For Artist"
-                        type="input"
-                        onKeyDown={event => {
-                            if (event.key == "Enter") {
-                                search();
-                            }
-                        }}
-                        onChange={event => setSearchInput(event.target.value)}
-                    />
-                    <Button onClick={search}>
-                        Search
-                    </Button>
-                </InputGroup>
+                <Routes>
+                    <Route path='/' element={<Home isLoggedIn={isLoggedIn} /> } />
+                    <Route path='/signup' element={<SignUp /> } />
+                    <Route path='/login' element={<Login logUserIn={logUserIn} /> } />
+                </Routes>
             </Container>
-            <Container>
-                <Row className="mx-2 row row-cols-4">
-                    <Card>
-                        <Card.Img src="#" />
-                        <Card.Body>
-                            <Card.Title>Album Name Here</Card.Title>
-                        </Card.Body>
-                    </Card>
-                </Row>
-            </Container>
-        </div>
+        </>
     );
 }
-
-export default App;
