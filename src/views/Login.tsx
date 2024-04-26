@@ -3,16 +3,17 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
-import { UserFormDataType } from '../types';
+import { UserFormDataType, CategoryType } from '../types';
 import { login } from '../lib/apiWrapper';
 import { useNavigate } from 'react-router-dom';
 
 
 type LoginProps = {
     logUserIn: () => void,
+    flashMessage: (newMessage:string|undefined, newCategory:CategoryType|undefined) => void
 }
 
-export default function Login({ logUserIn }: LoginProps) {
+export default function Login({ logUserIn, flashMessage }: LoginProps) {
     const navigate = useNavigate();
 
     const [userFormData, setUserFormData] = useState<Partial<UserFormDataType>>(
@@ -31,21 +32,22 @@ export default function Login({ logUserIn }: LoginProps) {
         
         const response = await login(userFormData.username!, userFormData.password!)
         if (response.error){
-            console.log(response.error)
+            flashMessage(response.error, 'danger')
         } else {
             const token = response.data!.token;
             const tokenExp = response.data!.tokenExpiration;
             localStorage.setItem('token', token);
             localStorage.setItem('tokenExp', tokenExp);
             logUserIn();
+            flashMessage("You have successfully logged in", 'success')
             navigate('/')
         }
     }
 
     return (
         <>
-            <h1 className="text-center">Log In Here</h1>
-            <Card>
+            <Card className='p-2 m-2'>
+                <Card.Title>Log In</Card.Title>
                 <Card.Body>
                     <Form onSubmit={handleFormSubmit}>
                         <Form.Label htmlFor='username'>Username</Form.Label>

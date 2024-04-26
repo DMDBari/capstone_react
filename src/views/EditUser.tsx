@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate,} from 'react-router-dom';
 import { deleteUserById, editUserById, getMe } from '../lib/apiWrapper';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
-import { UserFormDataType, UserType } from '../types';
+import { UserFormDataType, UserType, CategoryType } from '../types';
 
 type EditUserProps = {
     currentUser: UserType|null
+    flashMessage: (message:string, category:CategoryType) => void
+    logUserOut: () => void
 }
 
-export default function EditUser({ currentUser }: EditUserProps) {
-    const { id } = useParams();
+export default function EditUser({ currentUser, flashMessage, logUserOut }: EditUserProps) {
+
+    const id = currentUser?.id;
     const navigate = useNavigate();
 
     const [userToEditData, setUserToEditData] = useState<UserFormDataType>({email: '', username: '', password: '', confirmPassword: ''})
@@ -23,18 +26,26 @@ export default function EditUser({ currentUser }: EditUserProps) {
     
     useEffect( () => {
         async function getUser(){
-            let response = await getMe(id!)
+            let token = localStorage.getItem('token') || ''
+            let response = await getMe(token)
             if (response.data){
                 const user = response.data
                 const currentUser = JSON.parse(localStorage.getItem('currentUser')|| '{}')
                 if (currentUser?.id !== user.id){
+                    console.log(response.data)
+                    flashMessage('You do not have permission to edit this user', 'danger')
                     navigate('/')
                 } else {
+                    console.log(response.data)
                     setUserToEditData({email: user.email, username: user.username, password: user.password, confirmPassword: user.confirmPassword})
                 }
             } else if(response.error){
-                // navigate('/')
+                console.log(response.data)
+                flashMessage(response.error, 'danger')
+                navigate('/')
             } else {
+                console.log(response.data)
+                flashMessage("Something went wrong", 'warning')
                 navigate('/')
             }
         }
@@ -51,8 +62,9 @@ export default function EditUser({ currentUser }: EditUserProps) {
         const token = localStorage.getItem('token') || ''
         const response = await editUserById(id!, token, userToEditData);
         if (response.error){
-            console.log(response.error, 'danger')
+            flashMessage(response.error, 'danger')
         } else {
+            flashMessage(`${response.data?.username} has been updated`, 'success')
             navigate('/')
         }
     }
@@ -61,9 +73,11 @@ export default function EditUser({ currentUser }: EditUserProps) {
         const token = localStorage.getItem('token') || '';
         const response = await deleteUserById(id!, token);
         if (response.error){
-            console.log(response.error, 'danger')
+            flashMessage(response.error, 'danger')
         } else {
-            navigate('/')
+            flashMessage(response.data!, 'primary')
+            navigate('/');
+            logUserOut();
         }
     }
 
@@ -73,7 +87,7 @@ export default function EditUser({ currentUser }: EditUserProps) {
         <>
             <Card className='my-3'>
                 <Card.Body>
-                    <h3 className="text-center">Edit Post</h3>
+                    <h3 className="text-center">Edit User</h3>
                     <Form onSubmit={handleFormSubmit}>
                         <Form.Label>Username</Form.Label>
                         <Form.Control name='username' placeholder='Edit Username' value={userToEditData.username} onChange={handleInputChange} />

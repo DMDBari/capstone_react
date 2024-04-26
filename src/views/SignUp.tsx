@@ -3,14 +3,16 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
-import { UserFormDataType } from '../types';
+import { CategoryType, UserFormDataType } from '../types';
 import { register } from '../lib/apiWrapper';
 import { useNavigate } from 'react-router-dom';
 
 
-type SignUpProps = {}
+type SignUpProps = {
+    flashMessage: (newMessage:string|undefined, newCategory:CategoryType|undefined) => void
+}
 
-export default function SignUp({ }: SignUpProps) {
+export default function SignUp({ flashMessage }: SignUpProps) {
     const navigate = useNavigate();
 
     const [userFormData, setUserFormData] = useState<UserFormDataType>(
@@ -31,19 +33,22 @@ export default function SignUp({ }: SignUpProps) {
 
         let response = await register(userFormData);
         if (response.error){
+            flashMessage(response.error, 'danger')
         } else {
             let newUser = response.data!
+            flashMessage(`new user ${newUser.username} has been created`, 'success')
             navigate('/');
         }
     }
 
-    // const disableSubmit = userFormData.password.length < 5 || userFormData.password !== userFormData.confirmPassword
+
+
     const disableSubmit = !/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[A-Z])(?=.*[-\#\$\.\%\&\*\!\?\@])(?=.*[a-zA-Z]).{8,16}$/.test(userFormData.password) || userFormData.password !== userFormData.confirmPassword
 
     return (
         <>
-            <h1 className="text-center">Sign Up Here</h1>
-            <Card>
+            <Card className='p-2 m-2'>
+                <Card.Title>Sign Up</Card.Title>
                 <Card.Body>
                     <Form onSubmit={handleFormSubmit}>
                         <Form.Label htmlFor='email'>Email</Form.Label>

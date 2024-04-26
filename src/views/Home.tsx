@@ -50,7 +50,7 @@ export default function Home({ isLoggedIn }: HomeProps) {
             .then(response => response.json())
             .then(data => { return data.artists.items[0].id })
         // Get request with Artist ID grab all the albums from that artist
-        let artistAlbums = await fetch('https://api.spotify.com/v1/artists/' + artistID + '/albums' + '?include_groups=album&market=US&limit48', searchParameters)
+        let artistAlbums = await fetch('https://api.spotify.com/v1/artists/' + artistID + '/albums' + '?include_groups=album&market=US', searchParameters)
             .then(response => response.json())
             .then(data => {
                 setAlbums(data.items);
@@ -63,7 +63,7 @@ export default function Home({ isLoggedIn }: HomeProps) {
     return (
         <>
             <Container>
-                <InputGroup className="mb-3" size="lg">
+                <InputGroup className="m-3 " size="lg">
                     <FormControl
                         placeholder="Search For Artist"
                         type="input"

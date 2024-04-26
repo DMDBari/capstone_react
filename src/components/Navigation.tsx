@@ -10,7 +10,7 @@ type NavigationProps = {
 
 export default function Navigation({ isLoggedIn, logUserOut }: NavigationProps) {
     return (
-        <Navbar expand='lg'>
+        <Navbar expand='lg' bg='light'>
             <Container fluid>
                 <Navbar.Brand as={Link} to='/'>Album Finder</Navbar.Brand>
                 <Navbar.Toggle aria-controls='nav-collapse' />
@@ -18,7 +18,7 @@ export default function Navigation({ isLoggedIn, logUserOut }: NavigationProps) 
                     <Nav className='me-auto'>
                         {isLoggedIn ? (
                             <>
-                                <Nav.Link as={Link} to='/edit/:id'>Edit User</Nav.Link>
+                                <Nav.Link as={Link} to='/edit'>Edit User</Nav.Link>
                                 <Nav.Link as={Link} to='/' onClick={() => logUserOut()}>Log Out</Nav.Link>
                             </>
                         ) : (

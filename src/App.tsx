@@ -6,13 +6,16 @@ import Navigation from './components/Navigation';
 import Login from './views/Login';
 import SignUp from './views/SignUp';
 import EditUser from './views/EditUser';
-import { UserType } from './types';
+import AlertMessage from './components/AlertMessage';
+import { UserType, CategoryType } from './types';
 import { getMe } from './lib/apiWrapper'
 
 
 export default function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('token') && new Date(localStorage.getItem('tokenExp') || 0) > new Date() ? true : false);
     const [loggedInUser, setLoggedInUser] = useState<UserType | null>(null)
+    const [message, setMessage] = useState<string|undefined>(undefined)
+    const [category, setCategory] = useState<CategoryType|undefined>(undefined)
 
     useEffect(() => {
         async function getLoggedInUser() {
@@ -31,6 +34,11 @@ export default function App() {
         getLoggedInUser()
     }, [isLoggedIn])
 
+    const flashMessage = (newMessage:string|undefined, newCategory:CategoryType|undefined) => {
+        setMessage(newMessage);
+        setCategory(newCategory);
+    }
+
     const logUserIn = () => {
         setIsLoggedIn(true)
     }
@@ -41,17 +49,19 @@ export default function App() {
         localStorage.removeItem('token');
         localStorage.removeItem('tokenExp');
         localStorage.removeItem('currentUser');
+        flashMessage('You have been logged out', 'dark')
     }
 
     return (
         <>
             <Navigation isLoggedIn={isLoggedIn} logUserOut={logUserOut} />
             <Container>
+                {message && <AlertMessage message={message} category={category} flashMessage={flashMessage} />}
                 <Routes>
                     <Route path='/' element={<Home isLoggedIn={isLoggedIn} /> } />
-                    <Route path='/signup' element={<SignUp /> } />
-                    <Route path='/login' element={<Login logUserIn={logUserIn} /> } />
-                    <Route path='/edit/:id' element={<EditUser currentUser={loggedInUser} />} />
+                    <Route path='/signup' element={<SignUp flashMessage={flashMessage}/> } />
+                    <Route path='/login' element={<Login logUserIn={logUserIn} flashMessage={flashMessage}/> } />
+                    <Route path='/edit' element={<EditUser currentUser={loggedInUser} flashMessage={flashMessage} logUserOut={logUserOut} />} />
                 </Routes>
             </Container>
         </>
