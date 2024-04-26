@@ -22,8 +22,6 @@ export default function SignUp({ }: SignUpProps) {
         }
     )
 
-    const [seePassword, setSeePassword] = useState(false);
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUserFormData({...userFormData, [e.target.name]: e.target.value })
     }
@@ -56,12 +54,12 @@ export default function SignUp({ }: SignUpProps) {
 
                         <Form.Label htmlFor='password'>Password</Form.Label>
                         <InputGroup>
-                            <Form.Control id='password' name='password' type={seePassword ? 'text' : 'password'} placeholder='Enter Password' value={userFormData.password} onChange={handleInputChange}/>
+                            <Form.Control id='password' name='password' type={'password'} placeholder='Enter Password' value={userFormData.password} onChange={handleInputChange}/>
                         </InputGroup>
 
                         <Form.Label htmlFor='confirmPassword'>Confirm Password</Form.Label>
                         <InputGroup>
-                            <Form.Control id='confirmPassword' name='confirmPassword'  type={seePassword ? 'text' : 'password'} placeholder='Confirm Password' value={userFormData.confirmPassword} onChange={handleInputChange}/>
+                            <Form.Control id='confirmPassword' name='confirmPassword'  type={'password'} placeholder='Confirm Password' value={userFormData.confirmPassword} onChange={handleInputChange}/>
                         </InputGroup>
 
                         <Button type='submit' variant='outline-primary' className='w-100 mt-3' disabled={disableSubmit}>Create New User</Button>

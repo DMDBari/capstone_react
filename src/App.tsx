@@ -5,6 +5,7 @@ import Home from './views/Home';
 import Navigation from './components/Navigation';
 import Login from './views/Login';
 import SignUp from './views/SignUp';
+import EditUser from './views/EditUser';
 import { UserType } from './types';
 import { getMe } from './lib/apiWrapper'
 
@@ -50,6 +51,7 @@ export default function App() {
                     <Route path='/' element={<Home isLoggedIn={isLoggedIn} /> } />
                     <Route path='/signup' element={<SignUp /> } />
                     <Route path='/login' element={<Login logUserIn={logUserIn} /> } />
+                    <Route path='/edit/:id' element={<EditUser currentUser={loggedInUser} />} />
                 </Routes>
             </Container>
         </>
